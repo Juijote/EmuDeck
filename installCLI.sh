@@ -14,26 +14,26 @@ if [ -f "$PIDFILE" ]; then
   PID=$(cat "$PIDFILE")
   ps -p "$PID" > /dev/null 2>&1
   if [ $? -eq 0 ]; then
-    echo "Process already running"
+    echo "进程已经运行"
     exit 1
   else
     ## Process not found assume not running
     echo $$ > "$PIDFILE"
     if [ $? -ne 0 ]; then
-      echo "Could not create PID file"
+      echo "无法创建 PID 文件"
       exit 1
     fi
   fi
 else
   echo $$ > "$PIDFILE"
   if [ $? -ne 0 ]; then
-    echo "Could not create PID file"
+    echo "无法创建 PID 文件"
     exit 1
   fi
 fi
 
 function finish {
-  echo "Script terminating. Exit code $?"
+  echo "脚本终止，退出代码 $?"
 
 
 
@@ -88,7 +88,7 @@ EMUDECKGIT="$HOME/.config/EmuDeck/backend"
 
 #
 ##
-echo 'Downloading files...'
+echo '正在下载文件...'
 ##
 #
 #
@@ -118,7 +118,7 @@ if [[ ! -e $EMUDECKGIT ]]; then
 else
 	git status "$EMUDECKGIT" --porcelain
 	if [[ ! $noPull == true ]]; then
-		echo "Resetting install files."
+		echo "重置安装文件。"
 		#git fetch origin
 		#git reset --hard origin/$branch
 		#git clean -ffdx
@@ -135,7 +135,7 @@ fi
 
 #Test if we have a successful clone	
 if [ -d "$EMUDECKGIT" ]; then
-	echo -e "Files Downloaded!"
+	echo -e "文件已下载！"
 clear
 #cat $EMUDECKGIT/logo.ans
 version=$(cat "$EMUDECKGIT/version.md")
@@ -145,8 +145,8 @@ cat "$EMUDECKGIT/latest.md"
 
 else
 	echo -e ""
-	echo -e "Backend Files are missing!"
-	echo -e "Please close this window and try again in a few minutes"
+	echo -e "后台文件丢失！"
+	echo -e "请关闭此窗口并在几分钟后重试"
 	sleep 999999
 	exit
 fi
@@ -171,28 +171,28 @@ testRealDeck
 
 #This part of the code is where all the settings are created
 
-STARTOPTIONS=(1 "Rerun Emudeck"
-         2 "Change a Config Option"
-         3 "Install or update an Emulator"
-		 4 "Full reset an Emulator")
+STARTOPTIONS=(1 "重新运行 Emudeck"
+         2 "更改配置选项"
+         3 "安装或更新模拟器"
+		 4 "完全重置模拟器")
 
-RUNCHOICE=$(dialogCLI "What should we do today?" "${STARTOPTIONS[@]}")
+RUNCHOICE=$(dialogCLI "今天我们应该做什么？" "${STARTOPTIONS[@]}")
 
 
 case $RUNCHOICE in
-        1) echo "You chose to rerun EmuDeck"
+        1) echo "选择重新运行 EmuDeck"
             ;;
-        2) echo "Change a Config Option"
+        2) echo "更改配置选项"
             ;;
-        3) echo "Install or update an Emulator"
+        3) echo "安装或更新模拟器"
             ;;
-        4) echo "Full reset an Emulator"
+        4) echo "完全重置模拟器"
             ;;
-		*) echo "Cancelled"
+		*) echo "取消"
             ;;
 esac
 if [ -z "$RUNCHOICE" ]; then
-	echo "No choice made"
+	echo "无选择"
 	exit
 fi
 if [ "$RUNCHOICE" == 1 ]; then
@@ -201,57 +201,57 @@ if [ "$RUNCHOICE" == 1 ]; then
 	# Initialize locations
 	#
 	locationTable=()
-	locationTable+=("Internal" "$HOME") #always valid
+	locationTable+=("本机" "$HOME") #always valid
 	
 	#built in SD Card reader
 	sdCardFull=$(getSDPath)
 	sdValid=$(testLocationValid "SD" "$sdCardFull")
 	echo "$sdCardFull $sdValid"
-    if [[ ! $sdValid =~ "Invalid" ]]; then
-		locationTable+=("SD Card" "$sdCardFull") 
+    if [[ ! $sdValid =~ "无效的" ]]; then
+		locationTable+=("SD 卡" "$sdCardFull") 
 	fi
 
 	#
 	# Installation mode selection
 	#
-	OPTIONS=(1 "Easy Mode"
-			2 "Expert Mode")
+	OPTIONS=(1 "简易模式"
+			2 "高级模式")
 
-	modeChoice=$(dialogCLI "Do you want to use Easy Mode or Expert Mode?" "${OPTIONS[@]}")
+	modeChoice=$(dialogCLI "您想使用简易模式还是高级模式？" "${OPTIONS[@]}")
 
 	if [ "$modeChoice" == "2" ]; then
 		setSetting expert true
-		echo "Mode selected: Expert"
-		locationTable+=("Custom" "CUSTOM") #in expert mode we'll allow the user to pick an arbitrary place.
+		echo "已选择模式: 高级"
+		locationTable+=("自定义" "CUSTOM") #in expert mode we'll allow the user to pick an arbitrary place.
 	else
 		setSetting expert false
-		echo "Mode selected: Easy"
+		echo "已选择模式: 简易"
 	fi
 	
 	#
 	#Storage Selection
 	#
 	storageSelection(){
-		destination=$(dialogCLI "Where would you like Emudeck to be installed? SDCardStatus: $sdValid" "${locationTable[@]}")
+		destination=$(dialogCLI "你希望将 Emudeck 安装在哪里？ SD 卡状态: $sdValid" "${locationTable[@]}")
 
 
 		if [ -n "$destination" ]; then
-			echo "Storage: ${destination}"
+			echo "存储: ${destination}"
 			if [[ $destination == "Custom" ]]; then
 				clear
-				echo "type your custom location. It will be tested for validity."
+				echo "输入自定义位置，将测试其有效性。"
 				read -r destination
-				customValid=$(testLocationValid "Custom" "${destination}")
+				customValid=$(testLocationValid "自定义" "${destination}")
 				echo "$customValid"
-				if [[ $customValid =~ "Invalid" ]]; then
-					echo "User chose invalid location. Retry."
+				if [[ $customValid =~ "本机" ]]; then
+					echo "用户选择了无效位置，重试。"
 					#zenity pop up explaining why
 					pause
 					storageSelection
 				fi
 			fi
 			else
-			echo "No storage choice made"
+			echo "未选择存储"
 			exit
 		fi
 	}
@@ -276,7 +276,7 @@ if [ "$RUNCHOICE" == 1 ]; then
 	mkdir -p "$biosPath"/yuzu
 	
 	##Generate rom folders
-	setMSG "Creating roms folder in $destination"
+	setMSG "创建 roms 文件夹 $destination"
 	
 	sleep 3
 	rsync -r --ignore-existing "$EMUDECKGIT/roms/" "$romsPath"/ 
@@ -293,22 +293,22 @@ if [ "$RUNCHOICE" == 1 ]; then
 		
 			#one entry per expert mode feature
 			table=()
-			table+=( "CHDScript" "Install the latest version of our CHD conversion script?" ON )
-			table+=( "PowerTools" "Install Power Tools for CPU control? (password required)" ON )
-			table+=( "SteamGyro" "Setup the SteamDeckGyroDSU for gyro control (password required)" ON )
-			table+=( "updateSRM" "Install/Update Steam Rom Manager? Customizations will not be reset." ON )
-			table+=( "updateESDE" "Install/Update Emulation Station DE? Customizations and scrapes will not be reset." ON )
-			table+=( "selectEmulators" "Select the emulators to install." ON )
-			table+=( "selectEmulatorConfig" "Customize the emulator configuration reset. (note: Fixes will be skipped if boxes are unchecked)" ON )
-			table+=( "selectRABezels" "Turn on Bezels for Retroarch?" ON )
-			table+=( "selectRAAutoSave" "Turn on Retroarch AutoSave/Restore state?" ON )
-			table+=( "snesAR" "SNES 8:7 Aspect Ratio? (unchecked is 4:3)" ON )
-			table+=( "selectWideScreen" "Customize Emulator Widescreen Selection?" ON )
-			table+=( "setRAEnabled" "Enable Retroachievments in Retroarch?" ON )
-			table+=( "setRASignIn" "Change RetroAchievements Sign in?" ON )
-			table+=( "doESDEThemePicker" "Choose your EmulationStation-DE Theme?" ON )		
+			table+=( "CHDScript" "安装最新版本的 CHD 转换脚本？" ON )
+			table+=( "PowerTools" "安装 Power Tools 进行 CPU 控制？ （要求输入密码）" ON )
+			table+=( "SteamGyro" "设置 SteamDeckGyroDSU 以进行陀螺仪控制（需要密码）" ON )
+			table+=( "updateSRM" "安装/更新 Steam Rom 管理器？自定义设置不会被重置。" ON )
+			table+=( "updateESDE" "安装/更新模拟器前端 ESDE？自定义设置不会被重置。" ON )
+			table+=( "selectEmulators" "选择要安装的模拟器。" ON )
+			table+=( "selectEmulatorConfig" "自定义模拟器配置重置（注意：如果未选中复选框，修复将被跳过）" ON )
+			table+=( "selectRABezels" "为 Retroarch 打开边框？" ON )
+			table+=( "selectRAAutoSave" "打开 Retroarch 自动保存/恢复状态？" ON )
+			table+=( "snesAR" "SNES 8:7 屏幕比例？ （未选中时为 4:3）" ON )
+			table+=( "selectWideScreen" "自定义模拟器宽屏选择？" ON )
+			table+=( "setRAEnabled" "在 Retroarch 中启用 Retroachievements 游戏成就 吗？" ON )
+			table+=( "setRASignIn" "更改 RetroAchievements 登录？" ON )
+			table+=( "doESDEThemePicker" "选择你的 ESDE 主题？" ON )		
 			#table+=(TRUE "doXboxButtons" "Should facebutton letters match between Nintendo and Steamdeck? (default is matched location)")
-			expertModeFeatureList=$(whiptail --title "Check list example" --checklist "Choose user's permissions" 50 78 4 "${table[@]}")
+			expertModeFeatureList=$(whiptail --title "检查清单示例" --checklist "选择用户的权限" 50 78 4 "${table[@]}")
 
 			echo "user selected: $expertModeFeatureList"
 			#set flags to true for selected expert mode features
@@ -359,31 +359,31 @@ if [ "$RUNCHOICE" == 1 ]; then
 			if [[ $doInstallPowertools == "true" || $doInstallGyro == "true" || $isRealDeck == "false" ]]; then
 				hasPass=$(passwd -S "$USER" | awk -F " " '{print $2}')
 				if [[ ! $hasPass == "P" ]]; then
-					text="$(printf "<b>Password not set.</b>\n Please set one now in the terminal.\nYou will not see text entry in the terminal for your password. This is normal.\nOnce set, you will be prompted to enter it in a new window.")"
+					text="$(printf "<b>未设置密码。</b>\n 请立即在终端中设置一项。\n 你将不会在终端中看到密码文本输入，这是正常现象。\n 设置后，系统将提示你在新窗口中输入。")"
 					zenity --error \
 					--title="EmuDeck" \
 					--width=400 \
 					--text="${text}" 2>/dev/null
 					sleep 1
 					clear
-					echo "Enter a new password for the local Deck account here. You will have to enter it twice. No visual indication of typing will occur."
-					echo "Please remember it."
+					echo "在此处输入本地 Deck 帐户的新密码，你必须输入两次，不会出现输入指示。"
+					echo "请记住它。"
 					passwd
 					ans=$?
 					if [[ $ans == 1 ]]; then
-						echo "Setting password failed."
+						echo "设置密码失败。"
 					fi
 				fi
-				PASSWD="$(zenity --password --title="Password Entry" --text="Enter Deck User Password (not Steam account!)" 2>/dev/null)"
+				PASSWD="$(zenity --password --title="输入密码" --text="输入 Deck 用户密码（不是 Steam 帐户！）" 2>/dev/null)"
 				echo "$PASSWD" | sudo -v -S
 				ans=$?
 				if [[ $ans == 1 ]]; then
 					#incorrect password
-					PASSWD="$(zenity --password --title="Password Entry" --text="Password was incorrect. Try again. (Did you remember to set a password for linux before running this?)" 2>/dev/null)"
+					PASSWD="$(zenity --password --title="输入密码" --text="密码不正确，再试一次。 （你记得在运行这个之前为 Linux 设置一个密码吗？）" 2>/dev/null)"
 					echo "$PASSWD" | sudo -v -S
 					ans=$?
 					if [[ $ans == 1 ]]; then
-							text="$(printf "<b>Password not accepted.</b>\n Expert mode tools which require a password will not work. Disabling them.")"
+							text="$(printf "<b>密码不被接受。</b>\n 需要密码的高级模式工具将无法工作，禁用它们。")"
 							zenity --error \
 							--title="EmuDeck" \
 							--width=400 \
@@ -418,7 +418,7 @@ if [ "$RUNCHOICE" == 1 ]; then
 			fi
 			
 			#Emulator selector
-			text="$(printf "What emulators do you want to install?")"
+			text="$(printf "你想安装什么模拟器？")"
 			emusToInstall=$(zenity --list \
 					--title="EmuDeck" \
 					--height=500 \
@@ -435,7 +435,7 @@ if [ "$RUNCHOICE" == 1 ]; then
 			ans=$?
 			
 			if [ $ans -eq 0 ]; then
-				echo "Emu Install selected: $emusToInstall"
+				echo "Emu 将安装选定的: $emusToInstall"
 				if [[ "$emusToInstall" == *"mGBA"* ]]; then
 					setSetting doInstallMGBA true
 				fi
@@ -502,7 +502,7 @@ if [ "$RUNCHOICE" == 1 ]; then
 			emuTable+=(TRUE "RA-Flycast")
 			emuTable+=(TRUE "Xemu")
 	
-			text="$(printf "Selected Emulators will use WideScreen Hacks")"
+			text="$(printf "选定的模拟器将使用黑客宽屏")"
 			wideToInstall=$(zenity --list \
 						--title="EmuDeck" \
 						--height=500 \
@@ -516,7 +516,7 @@ if [ "$RUNCHOICE" == 1 ]; then
 						"${emuTable[@]}"  2>/dev/null)
 			ans=$?	
 			if [ $ans -eq 0 ]; then
-				echo "Widescreen choices: $wideToInstall"
+				echo "宽屏选择: $wideToInstall"
 				if [[ "$wideToInstall" == *"Duckstation"* ]]; then
 					setSetting duckWide true
 				else
@@ -574,7 +574,7 @@ if [ "$RUNCHOICE" == 1 ]; then
 				emuTable+=(TRUE "Steam Rom Manager")
 				emuTable+=(TRUE "EmulationStation DE")
 	
-				text="$(printf "<b>EmuDeck will reset the following Emulator's configurations by default.</b>\nWhich systems do you want <b>reset</b> to the newest version of the defaults?\nWe recommend you keep all of them checked so everything gets updated and known issues are fixed.\nIf you want to mantain any custom configuration on an emulator unselect its name from this list.")"
+				text="$(printf "<b>默认情况下，EmuDeck 将重置以下模拟器的配置。</b>\n 你希望哪些系统 <b>重置</b>为最新版本的默认设置？\n 我们建议您检查所有系统，以便更新所有内容并修复已知问题。\n 如果你想保留任何自定义配置模拟器从此列表中取消选择。")"
 				emusToReset=$(zenity --list \
 									--title="EmuDeck" \
 									--height=500 \
@@ -591,7 +591,7 @@ if [ "$RUNCHOICE" == 1 ]; then
 				cat "$EMUDECKGIT/logo.ans"
 				echo -e "EmuDeck ${version}"
 				if [ $ans -eq 0 ]; then
-					echo "Emulators to reinstall selected: $emusToReset"
+					echo "将重新安装选择的模拟器: $emusToReset"
 					if [[ "$emusToReset" == *"mGBA"* ]]; then
 						setSetting doSetupMGBA true
 					fi
@@ -698,7 +698,7 @@ else
 	mkdir -p "$biosPath"/yuzu
 	
 	##Generate rom folders
-	setMSG "Creating roms folder in $romsPath"
+	setMSG "创建 roms 文件夹 $romsPath"
 	
 	sleep 3
 	rsync -r --ignore-existing "$EMUDECKGIT/roms/" "$romsPath" 
@@ -807,7 +807,7 @@ fi
 #setMSG "Configuring Steam Input for emulators.." moved to emu install
 
 
-setMSG "Configuring emulators"
+setMSG "配置模拟器"
 
 if [ "$doSetupRA" == "true" ]; then
 	RetroArch_init
@@ -1068,7 +1068,7 @@ if [ -f "$FILE" ]; then
 	echo -e "" 2>/dev/null
 else
 	if [ "$zenity" == true ]; then
-	text="$(printf "<b>Yuzu is not configured</b>\nYou need to copy your Keys and firmware to: \n${biosPath}yuzu/keys\n${biosPath}yuzu/firmware\n\nMake sure to copy your files inside the folders. <b>Do not overwrite them</b>")"
+	text="$(printf "<b>Yuzu 未配置</b>\n 你需要将密钥 key 和固件复制到: \n${biosPath}yuzu/keys\n${biosPath}yuzu/firmware\n\n 确保将文件复制到文件夹内。，<b>不要覆盖它们</b>")"
 	zenity --error \
 			--title="EmuDeck" \
 			--width=400 \
@@ -1105,18 +1105,18 @@ fi
 echo "" > "$HOME/.config/EmuDeck/.finished"
 echo "" > "$HOME/.config/EmuDeck/.electron-finished"
 echo "100" > "$HOME/.config/EmuDeck/msg.log"
-echo "# Installation Complete" >> "$HOME/.config/EmuDeck/msg.log"
+echo "# 安装完成" >> "$HOME/.config/EmuDeck/msg.log"
 finished=true
 rm "$PIDFILE"
 
 if [ "$zenity" == true ]; then
 
-	text="$(printf "<b>Done!</b>\n\nRemember to add your games here:\n<b>${romsPath}</b>\nAnd your Bios (PS1, PS2, Yuzu) here:\n<b>${biosPath}</b>\n\nOpen Steam Rom Manager on your Desktop to add your games to your SteamUI Interface.\n\nThere is a bug in RetroArch that if you are using Bezels you can not set save configuration files unless you close your current game. Use overrides for your custom configurations or use expert mode to disabled them\n\nIf you encounter any problem please visit our Discord:\n<b>https://discord.gg/b9F7GpXtFP</b>\n\nTo Update EmuDeck in the future, just run this App again.\n\nEnjoy!")"
+	text="$(printf "<b>完毕！</b>\n\n 请记住在此处添加你的游戏:\n<b>${romsPath}</b>\n 和你的 Bios 文件 (PS1, PS2, Yuzu) 这里:\n<b>${biosPath}</b>\n\n 打开桌面上的 Steam Rom 管理器，将游戏添加到 SteamUI 界面。\n\n RetroArch 发生错误，如果你使用 Bezels，则除非关闭当前游戏，否则无法设置保存配置文件。使用覆盖你的自定义配置或使用高级模式禁用它们 \n\n 如果你遇到任何问题，请访问我们的 Discord:\n<b>https://discord.gg/b9F7GpXtFP</b>\n\n 以后要更新 EmuDeck，只需再次运行此应用程序即可。\n\n 尽情享受吧！")"
 	
 	zenity --question \
 		 	--title="EmuDeck" \
 		 	--width=450 \
-		 	--ok-label="Open Steam Rom Manager" \
+		 	--ok-label="打开 Steam ROM 管理器" \
 		 	--cancel-label="Exit" \
 		 	--text="${text}" 2>/dev/null
 	ans=$?
@@ -1126,7 +1126,7 @@ if [ "$zenity" == true ]; then
 		zenity --question \
 		 	--title="EmuDeck" \
 		 	--width=350 \
-		 	--text="Return to Game Mode?" \
+		 	--text="返回游戏模式？" \
 		 	--ok-label="Yes" \
 		 	--cancel-label="No" 2>/dev/null
 		ans2=$?
